@@ -41,11 +41,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _B: -3.39
-    - _ColorResolution: 104.5
+    - _B: -4.12
+    - _ColorResolution: 52.9
     - _DitherAmount: 0.1
-    - _G: -0.34
-    - _R: -0.26
+    - _G: -0.3
+    - _R: 0.09
     - _ScreenScale: 0.3333333
     m_Colors: []
   m_BuildTextureStacks: []
