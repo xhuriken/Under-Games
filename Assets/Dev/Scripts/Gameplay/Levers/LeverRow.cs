@@ -12,6 +12,7 @@ public class LeverRow : MonoBehaviour
     [Tooltip("All levers in this row. If empty, can be auto-filled from children.")]
     [SerializeField] private List<Lever> levers = new List<Lever>();
 
+    private Lever latestActivatedLever;
     /// <summary>
     /// Owner of this row.
     /// </summary>
@@ -27,9 +28,39 @@ public class LeverRow : MonoBehaviour
         // OPTIONAL : Get all levers from children if none assigned
         if (levers == null || levers.Count == 0)
         {
+            // Include also the inactive ones ! (in the inspector you know)
             levers = new List<Lever>(GetComponentsInChildren<Lever>(includeInactive: true));
         }
+
+        foreach (Lever lever in levers)
+        {
+            if (lever == null) continue;
+            // For all the levers in the row, subscribe to their state change event
+            // (and call OnLeverStateChanged if he is called)
+            lever.OnStateChanged.AddListener(OnLeverStateChanged);
+        }
     }
+
+    /// <summary>
+    /// Called whenever any lever in the row changes state.
+    /// Handles the logic of the "latest activated lever".
+    /// </summary>
+    private void OnLeverStateChanged(Lever lever, LeverState newState)
+    {
+        // If lever is OFF do nothing
+        if (newState == LeverState.Off)
+            return;
+
+        // If there was a previously highlighted lever we reset it
+        if (latestActivatedLever != null && latestActivatedLever != lever)
+            latestActivatedLever.ClearLatestMarker();
+
+        // set the new one
+        latestActivatedLever = lever;
+        //Update to RED !
+        latestActivatedLever.SetAsLatestOnLever();
+    }
+
 
     /// <summary>
     /// Returns the lever at the given index, or null if out of range.
@@ -51,7 +82,7 @@ public class LeverRow : MonoBehaviour
         foreach (var lever in levers)
         {
             if (lever == null) continue;
-            lever.SetState(state);
+            lever.SetState(state, false);
         }
     }
 

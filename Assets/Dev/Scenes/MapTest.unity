@@ -373,10 +373,22 @@ MonoBehaviour:
   offLocalEulerAngles: {x: -130, y: 0, z: 0}
   onLocalEulerAngles: {x: -60, y: 0, z: 0}
   ledRenderer: {fileID: 569302220}
-  ledOnColor: {r: 0, g: 1, b: 0, a: 1}
-  ledOffColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOnColor: {r: 1, g: 0.6526397, b: 0, a: 1}
+  ledLatestOnColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOffColor: {r: 0.035793543, g: 1, b: 0, a: 1}
   ledOnIntensity: 4
-  ledOffIntensity: 4
+  ledOffIntensity: 2.5
+  rotationDuration: 0.2
+  blinkDuration: 0.2
+  ledFadeDuration: 0.15
+  glitchMinDelay: 2
+  glitchMaxDelay: 6
+  glitchMinFlashes: 1
+  glitchMaxFlashes: 4
+  glitchFlashDuration: 0.05
+  latestPulseSpeed: 0
+  latestPulseMinMultiplier: 0.8
+  latestPulseMaxMultiplier: 1.3
   onStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -547,10 +559,22 @@ MonoBehaviour:
   offLocalEulerAngles: {x: -130, y: 0, z: 0}
   onLocalEulerAngles: {x: -60, y: 0, z: 0}
   ledRenderer: {fileID: 1395542189}
-  ledOnColor: {r: 0, g: 1, b: 0, a: 1}
-  ledOffColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOnColor: {r: 1, g: 0.6526397, b: 0, a: 1}
+  ledLatestOnColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOffColor: {r: 0.035793543, g: 1, b: 0, a: 1}
   ledOnIntensity: 4
-  ledOffIntensity: 4
+  ledOffIntensity: 2.5
+  rotationDuration: 0.2
+  blinkDuration: 0.2
+  ledFadeDuration: 0.15
+  glitchMinDelay: 2
+  glitchMaxDelay: 6
+  glitchMinFlashes: 1
+  glitchMaxFlashes: 4
+  glitchFlashDuration: 0.05
+  latestPulseSpeed: 3
+  latestPulseMinMultiplier: 0.8
+  latestPulseMaxMultiplier: 1.3
   onStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -581,10 +605,22 @@ MonoBehaviour:
   offLocalEulerAngles: {x: -130, y: 0, z: 0}
   onLocalEulerAngles: {x: -60, y: 0, z: 0}
   ledRenderer: {fileID: 1317589403}
-  ledOnColor: {r: 0, g: 1, b: 0, a: 1}
-  ledOffColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOnColor: {r: 1, g: 0.6526397, b: 0, a: 1}
+  ledLatestOnColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOffColor: {r: 0.035793543, g: 1, b: 0, a: 1}
   ledOnIntensity: 4
-  ledOffIntensity: 4
+  ledOffIntensity: 2.5
+  rotationDuration: 0.2
+  blinkDuration: 0.2
+  ledFadeDuration: 0.15
+  glitchMinDelay: 2
+  glitchMaxDelay: 6
+  glitchMinFlashes: 1
+  glitchMaxFlashes: 4
+  glitchFlashDuration: 0.05
+  latestPulseSpeed: 3
+  latestPulseMinMultiplier: 0.8
+  latestPulseMaxMultiplier: 1.3
   onStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -2901,10 +2937,22 @@ MonoBehaviour:
   offLocalEulerAngles: {x: -130, y: 0, z: 0}
   onLocalEulerAngles: {x: -60, y: 0, z: 0}
   ledRenderer: {fileID: 1032442371}
-  ledOnColor: {r: 0, g: 1, b: 0, a: 1}
-  ledOffColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOnColor: {r: 1, g: 0.6526397, b: 0, a: 1}
+  ledLatestOnColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOffColor: {r: 0.035793543, g: 1, b: 0, a: 1}
   ledOnIntensity: 4
-  ledOffIntensity: 4
+  ledOffIntensity: 2.5
+  rotationDuration: 0.2
+  blinkDuration: 0.2
+  ledFadeDuration: 0.15
+  glitchMinDelay: 2
+  glitchMaxDelay: 6
+  glitchMinFlashes: 1
+  glitchMaxFlashes: 4
+  glitchFlashDuration: 0.05
+  latestPulseSpeed: 3
+  latestPulseMinMultiplier: 0.8
+  latestPulseMaxMultiplier: 1.3
   onStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -4651,10 +4699,22 @@ MonoBehaviour:
   offLocalEulerAngles: {x: -130, y: 0, z: 0}
   onLocalEulerAngles: {x: -60, y: 0, z: 0}
   ledRenderer: {fileID: 426111708}
-  ledOnColor: {r: 0, g: 1, b: 0, a: 1}
-  ledOffColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOnColor: {r: 1, g: 0.6526397, b: 0, a: 1}
+  ledLatestOnColor: {r: 1, g: 0, b: 0, a: 1}
+  ledOffColor: {r: 0.035793543, g: 1, b: 0, a: 1}
   ledOnIntensity: 4
-  ledOffIntensity: 4
+  ledOffIntensity: 2.5
+  rotationDuration: 0.2
+  blinkDuration: 0.2
+  ledFadeDuration: 0.15
+  glitchMinDelay: 2
+  glitchMaxDelay: 6
+  glitchMinFlashes: 1
+  glitchMaxFlashes: 4
+  glitchFlashDuration: 0.05
+  latestPulseSpeed: 0
+  latestPulseMinMultiplier: 0.8
+  latestPulseMaxMultiplier: 1.3
   onStateChanged:
     m_PersistentCalls:
       m_Calls: []
