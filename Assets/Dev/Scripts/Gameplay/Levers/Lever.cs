@@ -74,7 +74,6 @@ public class Lever : MonoBehaviour
     [Header("Animation !")]
     
     [SerializeField] [Min(0f)] private float rotationDuration = 0.2f;
-    [SerializeField] [Min(0f)] private float blinkDuration = 0.2f;
 
     [Tooltip("Duration for LED color fading between two states.")]
     [SerializeField][Min(0f)] private float ledFadeDuration = 0.15f;
@@ -226,7 +225,7 @@ public class Lever : MonoBehaviour
     private void UpdateVisuals(bool invokeEvent = true)
     {
         UpdateHandleRotation(invokeEvent);
-        UpdateLedEmission();
+        //UpdateLedEmission(); we we'll update it when the event is received by LeverRow
     }
 
     /// <summary>
@@ -252,6 +251,9 @@ public class Lever : MonoBehaviour
             }
 
             isAnimating = false; // Reset the animation flag
+
+            //Update led after the handle !
+            UpdateLedEmission();
         });
 
     }
@@ -344,8 +346,8 @@ public class Lever : MonoBehaviour
         isLatestOnLever = true;
 
         // Initial red (pulse will override)
-        Color startRed = ledLatestOnColor * Mathf.LinearToGammaSpace(ledOnIntensity);
-        SetEmissionInstant(startRed);
+        //Color startRed = ledLatestOnColor * Mathf.LinearToGammaSpace(ledOnIntensity);
+        //SetEmissionInstant(startRed);
     }
 
     /// <summary>
