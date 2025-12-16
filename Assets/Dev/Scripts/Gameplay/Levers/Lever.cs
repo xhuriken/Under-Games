@@ -33,7 +33,6 @@ public class LeverStateChangedEvent : UnityEvent<Lever, LeverState> { }
 
 /// <summary>
 /// Controls for a single lever: state, visuals (his handle and LED) and mouse click interaction. <br></br>
-/// TODO: Animations for led and handle movement !
 /// </summary>
 public class Lever : MonoBehaviour
 {
@@ -103,11 +102,6 @@ public class Lever : MonoBehaviour
 
     [Tooltip("Maximum HDR multiplier for the SIN pulse (relative to ledOnIntensity).")]
     [SerializeField][Range(0f, 2f)] private float latestPulseMaxMultiplier = 1.3f;
-
-
-    //
-    //TODO: The latest ON state changed, need to make different led animation (Green + red flashing?)!
-    //
 
     //--------------------------------
     [Header("Events")]
@@ -261,7 +255,6 @@ public class Lever : MonoBehaviour
     /// <summary>
     /// Updates the LED emission color using a MaterialPropertyBlock.
     /// HDR is handled by multiplying the base color by a gamma-corrected intensity.
-    /// TODO: ANIMATE THE LED COLOR CHANGE !!! (And idle ?)
     /// </summary>
     private void UpdateLedEmission()
     {
@@ -372,11 +365,11 @@ public class Lever : MonoBehaviour
         while (true)
         {
             // Random delay between two glitch bursts
-            float wait = UnityEngine.Random.Range(glitchMinDelay, glitchMaxDelay);
+            float wait = Random.Range(glitchMinDelay, glitchMaxDelay);
             yield return new WaitForSeconds(wait);
 
             // Random number of flashes for this burst
-            int flashes = UnityEngine.Random.Range(glitchMinFlashes, glitchMaxFlashes + 1);
+            int flashes = Random.Range(glitchMinFlashes, glitchMaxFlashes + 1);
 
             for (int i = 0; i < flashes; i++)
             {

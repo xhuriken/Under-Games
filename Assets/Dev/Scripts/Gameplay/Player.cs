@@ -1,6 +1,9 @@
+using DG.Tweening;
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
@@ -16,20 +19,47 @@ public class Player : MonoBehaviour
      * There will be another script we'll check when specific objects are clickable or not. (Like a manager you know) that it i think.
      */
 
+    [Header("Settings")]
+    [SerializeField] private Camera _camera;
 
+    [Header("Animation")]
     [Tooltip("Is the player currently in movement?")]
     [SerializeField] private bool isInMovement = false;
     [Tooltip("The speed at which the player moves.")]
     [SerializeField] private float movementSpeed = 5f;
 
+    [Header("Look")]
+    [SerializeField] private float minStep = 1f;
+    [SerializeField] private float maxStep = 5f;
+    [Tooltip("Mouse sensitivity for camera rotation.")]
+    [SerializeField] private float lookSensitivity = 3f;
+
+    [Tooltip("Clamp for vertical rotation (pitch).")]
+    [SerializeField] private float minPitch = -30f;
+    [SerializeField] private float maxPitch = 100f;
+
+    [Tooltip("DOTween smoothing duration for look rotation.")]
+    [SerializeField] [MinMaxSlider(0f, 0.5f)] private float lookTweenDuration = 0.08f;
+
+    private float _yaw;
+    private float _pitch;
+    private Tween _lookTween;
+
     void Start()
     {
-        
+        _camera = GetComponentInChildren<Camera>();
+
+        Vector3 euler = _camera.transform.rotation.eulerAngles;
+        _yaw = euler.y;
+        _pitch = euler.x;
     }
 
     void Update()
     {
 
+        if (!isInMovement) HandleLook();
+
+        
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
 
@@ -51,11 +81,81 @@ public class Player : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Whenused click on an PointClickTarget, we process it
+    /// </summary>
+    /// <param name="target"></param>
     public void HandleClick(PointClickTarget target)
     {
+        Debug.Log($"Player clicked on a PointClickTarget! {target.gameObject.name}");
+        //GameObject ob = target.gameObject;
 
-        Debug.Log("Player clicked on a PointClickTarget!");
+        switch (target.InteractionType)
+        {
+            case InteractionType.MoveTo:
+                // We had clicked on a point to go to ! 
+
+
+                Move(target);
+
+
+                return;
+            case InteractionType.Object:
+                // We had clicked on a object to use
+
+
+                return;
+            default:
+                Debug.Log("I'm gay");
+                return;
+        }
+    }
+
+    public void Move(PointClickTarget target)
+    {
+        if (isInMovement) return;
+        isInMovement = true;
+
+        Transform targetTransform = target.GetTransformTarget();
+
+        Transform cam = _camera.transform;
+
+        cam.DOKill();
+
+        Sequence seq = DOTween.Sequence();
+        
+        //TODO: Polish it !
+        seq.Join(cam.DOMove(targetTransform.position, 0.5f));
+
+        seq.Join(cam.DORotateQuaternion(targetTransform.rotation, 0.5f));
+
+        seq.OnComplete(() =>
+        {
+            isInMovement = false;
+        });
+    }
+
+
+    public void HandleLook()
+    {
+        // Process the look
+
+        float mx = Input.GetAxis("Mouse X");
+        float my = Input.GetAxis("Mouse Y");
+
+        // Update yaw/pitch
+        _yaw += mx * lookSensitivity;
+        _pitch -= my * lookSensitivity;
+
+        // Clamp pitch to avoid flipping
+        _pitch = Mathf.Clamp(_pitch, minPitch, maxPitch);
+
+        // Compute target rotation (camera orbits around player)
+        Quaternion targetRot = Quaternion.Euler(_pitch, _yaw, 0f);
+
+        // Smooth it with DOTween (kill previous tween to avoid stacking)
+        _lookTween?.Kill();
+        _lookTween = _camera.transform.DORotateQuaternion(targetRot, lookTweenDuration);
 
     }
 }
