@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +20,7 @@ public class Player : MonoBehaviour
      */
 
     [Header("Settings")]
+    [Tooltip("Reference to the player's camera. (Set up automaticly)")]
     [SerializeField] private Camera _camera;
 
     [Header("Animation")]
@@ -28,30 +29,48 @@ public class Player : MonoBehaviour
     [Tooltip("The speed at which the player moves.")]
     [SerializeField] private float movementSpeed = 5f;
 
+    [Header("Virtual Cursor")]
+    [Tooltip("UI cursor (RectTransform) displayed on a Screen Space - Overlay canvas.")]
+    [SerializeField] private RectTransform virtualCursor;
+
+    [SerializeField] private float mouseForce = 1f;
+    [SerializeField] private float returnForce = 5f;
+
+    [SerializeField] private Vector2 minEllipse = new Vector2(100f, 80f);
+    [SerializeField] private Vector2 maxEllipse = new Vector2(400f, 250f);
+
+    public float temp = 3f;
+
     [Header("Look")]
-    [SerializeField] private float minStep = 1f;
-    [SerializeField] private float maxStep = 5f;
     [Tooltip("Mouse sensitivity for camera rotation.")]
-    [SerializeField] private float lookSensitivity = 3f;
+    [SerializeField] private float lookSensitivity = 2.5f;
+
 
     [Tooltip("Clamp for vertical rotation (pitch).")]
     [SerializeField] private float minPitch = -30f;
-    [SerializeField] private float maxPitch = 100f;
+    [SerializeField] private float maxPitch = 80f;
 
     [Tooltip("DOTween smoothing duration for look rotation.")]
-    [SerializeField] [MinMaxSlider(0f, 0.5f)] private float lookTweenDuration = 0.08f;
+    [SerializeField] private float lookTweenDuration = 0.08f;
 
-    private float _yaw;
-    private float _pitch;
-    private Tween _lookTween;
+    private Vector2 cursorPos;
+    private float yaw;
+    private float pitch;
+    private Tween lookTween;
 
     void Start()
     {
         _camera = GetComponentInChildren<Camera>();
 
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        cursorPos = Vector2.zero;
+
         Vector3 euler = _camera.transform.rotation.eulerAngles;
-        _yaw = euler.y;
-        _pitch = euler.x;
+        yaw = euler.y;
+        pitch = euler.x;
+
     }
 
     void Update()
@@ -63,7 +82,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
 
-            //Launche raycast from mouse position
+            //Launch raycast from mouse position
 
             //Get Mouse Position
             Vector3 mousePos = Input.mousePosition;
@@ -135,27 +154,71 @@ public class Player : MonoBehaviour
         });
     }
 
-
     public void HandleLook()
     {
-        // Process the look
-
+        // mouse input
         float mx = Input.GetAxis("Mouse X");
         float my = Input.GetAxis("Mouse Y");
 
-        // Update yaw/pitch
-        _yaw += mx * lookSensitivity;
-        _pitch -= my * lookSensitivity;
+        // mouse pushes the virtual cursor
+        Vector2 mouseDelta = new Vector2(mx, my);
+        cursorPos += mouseDelta * mouseForce;
 
-        // Clamp pitch to avoid flipping
-        _pitch = Mathf.Clamp(_pitch, minPitch, maxPitch);
+        // compute normalized distances
+        float distMin = EllipseDistance(cursorPos, minEllipse);
+        float distMax = EllipseDistance(cursorPos, maxEllipse);
 
-        // Compute target rotation (camera orbits around player)
-        Quaternion targetRot = Quaternion.Euler(_pitch, _yaw, 0f);
+        // center attraction force
+        if (distMin > 1f)
+        {
+            float t = Mathf.InverseLerp(1f, temp, distMin);
+            Vector2 pullDir = -cursorPos.normalized;
+            cursorPos += pullDir * returnForce * t * Time.deltaTime;
+        }
 
-        // Smooth it with DOTween (kill previous tween to avoid stacking)
-        _lookTween?.Kill();
-        _lookTween = _camera.transform.DORotateQuaternion(targetRot, lookTweenDuration);
+        // hard clamp to max ellipse
+        if (distMax > 1f)
+        {
+            cursorPos = ClampToEllipse(cursorPos, maxEllipse);
+            distMax = 1f;
+        }
 
+        // apply to cursor
+        virtualCursor.anchoredPosition = cursorPos;
+
+        // camera follows only outside min ellipse
+        if (distMin <= 1f)
+            return;
+
+        float speed = Mathf.InverseLerp(1f, temp, distMin);
+
+        yaw += cursorPos.x * lookSensitivity * speed * Time.deltaTime;
+        pitch -= cursorPos.y * lookSensitivity * speed * Time.deltaTime;
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+        Quaternion targetRot = Quaternion.Euler(pitch, yaw, 0f);
+
+        // Animation
+        lookTween?.Kill();
+        lookTween = _camera.transform
+            .DORotateQuaternion(targetRot, lookTweenDuration);
     }
+
+
+    float EllipseDistance(Vector2 p, Vector2 ellipse)
+    {
+        return Mathf.Sqrt(
+            (p.x * p.x) / (ellipse.x * ellipse.x) +
+            (p.y * p.y) / (ellipse.y * ellipse.y)
+        );
+    }
+
+    Vector2 ClampToEllipse(Vector2 p, Vector2 ellipse)
+    {
+        float d = EllipseDistance(p, ellipse);
+        if (d <= 1f) return p;
+        return p / d;
+    }
+
+
 }
