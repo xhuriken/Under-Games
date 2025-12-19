@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -22,6 +23,9 @@ public class PointClickTarget : MonoBehaviour
 
     [Tooltip("Event called when this object is used")]
     [SerializeField] private UnityEvent onUse;
+
+    [Tooltip("All the outlines script for this object")]
+    [SerializeField] private Outline[] outlines;
 
     /// <summary>
     /// Called by the point & click controller when the player clicks on this object.
@@ -47,4 +51,24 @@ public class PointClickTarget : MonoBehaviour
         onUse?.Invoke();
     }
 
+    public void SetOutline(bool enable)
+    {
+        if (outlines == null && outlines.Length == 0f) return;
+
+        foreach (var o in outlines)
+        {
+            o.enabled = enable;
+        }
+    }
+
+    private void Awake()
+    {
+        // Disable all outline
+        if (outlines == null && outlines.Length == 0f) return;
+
+        foreach (var o in outlines)
+        {
+            o.enabled = false;
+        }
+    }
 }

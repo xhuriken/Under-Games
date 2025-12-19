@@ -175,10 +175,9 @@ public class Lever : MonoBehaviour
     }
 
     /// <summary>
-    /// Called when the user clicks on this object. (Unity native)
-    /// Requires a Collider component !
+    /// Called by the Use Unity Event
     /// </summary>
-    private void OnMouseDown()
+    private void Use()
     {
         // It's juste point and click
         Toggle();

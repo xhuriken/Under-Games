@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using Cursor = UnityEngine.Cursor;
 
 public class Player : MonoBehaviour
 {
@@ -75,29 +77,52 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-
         if (!isInMovement) HandleLook();
 
-        
+        // Throw raycast for hover !
+        RaycastHover();
+
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
+            // cursorPos is an offset from screen center (UI anchoredPosition)
+            Vector2 screenPoint = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) + cursorPos;
+            Ray ray = _camera.ScreenPointToRay(screenPoint);
 
-            //Launch raycast from mouse position
-
-            //Get Mouse Position
-            Vector3 mousePos = Input.mousePosition;
-            Ray ray = Camera.main.ScreenPointToRay(mousePos);
-            RaycastHit hit;
-            
-            //launch raycast
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                //Check if the object hit has a PointClickTarget component
                 PointClickTarget target = hit.collider.GetComponent<PointClickTarget>();
-
                 if (target != null) HandleClick(target);
             }
         }
+    }
+
+    private PointClickTarget _currentTarget;
+    private void RaycastHover()
+    {
+        Vector2 screenPoint = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) + cursorPos;
+        Ray ray = _camera.ScreenPointToRay(screenPoint);
+
+        PointClickTarget newTarget = null;
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            hit.collider.TryGetComponent(out newTarget);
+        }
+
+        if (newTarget == _currentTarget)
+            return;
+
+        // If we changed hovered object, disable previous outline
+        if (_currentTarget != null && _currentTarget != newTarget)
+            _currentTarget.SetOutline(false);
+
+        // Enable the new one
+        if (newTarget != null)
+            newTarget.SetOutline(true);
+
+        // Cache current
+        _currentTarget = newTarget;
+
     }
 
     /// <summary>
@@ -122,6 +147,7 @@ public class Player : MonoBehaviour
             case InteractionType.Object:
                 // We had clicked on a object to use
 
+                target.Use();
 
                 return;
             default:
@@ -132,26 +158,63 @@ public class Player : MonoBehaviour
 
     public void Move(PointClickTarget target)
     {
-        if (isInMovement) return;
         isInMovement = true;
 
+        // Get target transform from the clicked object
         Transform targetTransform = target.GetTransformTarget();
+        Transform cam = _camera.transform; // And our cam transform
 
-        Transform cam = _camera.transform;
+        // hide cursor
+        Color cursorColor = virtualCursor.gameObject.GetComponent<Image>().color;
+        Color cursorAlpha = new Color(cursorColor.r, cursorColor.g, cursorColor.b, 0f);
+        DOVirtual.Color(cursorColor, cursorAlpha, 0.10f, (value) =>
+        {
+            virtualCursor.gameObject.GetComponent<Image>().color = value;
+        }).OnComplete( () =>
+        {
+            // Move the cursor at 0 pos (because, we click on position to go to, so the cursor return at the center of the screen !)
+            cursorPos = Vector3.zero;
+            virtualCursor.anchoredPosition = Vector3.zero;
+        });
 
-        cam.DOKill();
 
-        Sequence seq = DOTween.Sequence();
+        //Calc distance from the two transform.
+        //The dist make the duration of animations (with an factor of speed)
+        float dist = Vector2.Distance(cam.position, targetTransform.position);
         
-        //TODO: Polish it !
-        seq.Join(cam.DOMove(targetTransform.position, 0.5f));
-
-        seq.Join(cam.DORotateQuaternion(targetTransform.rotation, 0.5f));
+        cam.DOKill();
+        Sequence seq = DOTween.Sequence();
+        //TODO: Polish it ! (I'm not sure of the dis/movementSpeed)
+        seq.Join(cam.DOMove(targetTransform.position, dist/movementSpeed)); // move
+        seq.Join(cam.DORotateQuaternion(targetTransform.rotation, dist/movementSpeed)); // rotate
 
         seq.OnComplete(() =>
         {
+
+            DOVirtual.Color(cursorAlpha, cursorColor, 0.20f, (value) =>
+            {
+                virtualCursor.gameObject.GetComponent<Image>().color = value;
+            });
+
+            // Set yaw pitch to the right pos
+            Vector3 euler = cam.rotation.eulerAngles;
+            yaw = euler.y;
+            pitch = NormalizeAngle(euler.x);
+
+            // Un hide cursor
             isInMovement = false;
         });
+    }
+
+    /// <summary>
+    /// Normalize angle (350 -> -10)
+    /// </summary>
+    /// <param name="a"></param>
+    /// <returns></returns>
+    float NormalizeAngle(float a)
+    {
+        if (a > 180f) a -= 360f;
+        return a;
     }
 
     public void HandleLook()
@@ -204,7 +267,12 @@ public class Player : MonoBehaviour
             .DORotateQuaternion(targetRot, lookTweenDuration);
     }
 
-
+    /// <summary>
+    /// Get distance of an position in one ellipse (for cursor and min-max Step)
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="ellipse"></param>
+    /// <returns></returns>
     float EllipseDistance(Vector2 p, Vector2 ellipse)
     {
         return Mathf.Sqrt(
@@ -213,12 +281,17 @@ public class Player : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Clamp the Ellipse distance
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="ellipse"></param>
+    /// <returns></returns>
     Vector2 ClampToEllipse(Vector2 p, Vector2 ellipse)
     {
         float d = EllipseDistance(p, ellipse);
         if (d <= 1f) return p;
         return p / d;
     }
-
 
 }
