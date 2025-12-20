@@ -41,6 +41,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector2 minEllipse = new Vector2(100f, 80f);
     [SerializeField] private Vector2 maxEllipse = new Vector2(400f, 250f);
 
+    // It's for the ramp of the lerp to make enjoyable look
+    // TODO: Move that, it's not "cleaan"
     public float temp = 3f;
 
     [Header("Look")]
@@ -55,6 +57,13 @@ public class Player : MonoBehaviour
     [Tooltip("DOTween smoothing duration for look rotation.")]
     [SerializeField] private float lookTweenDuration = 0.08f;
 
+    [Header("Cursor")]
+    [SerializeField] private Image virtualCursorImage;
+    [SerializeField] private Sprite cursorDefault;
+    [SerializeField] private Sprite cursorObject;
+    [SerializeField] private Sprite cursorMoveTo;
+
+    private PointClickTarget _currentTarget;
     private Vector2 cursorPos;
     private float yaw;
     private float pitch;
@@ -84,19 +93,15 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            // cursorPos is an offset from screen center (UI anchoredPosition)
-            Vector2 screenPoint = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) + cursorPos;
-            Ray ray = _camera.ScreenPointToRay(screenPoint);
-
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                PointClickTarget target = hit.collider.GetComponent<PointClickTarget>();
-                if (target != null) HandleClick(target);
-            }
+            if (_currentTarget != null)
+                HandleClick(_currentTarget);
         }
     }
 
-    private PointClickTarget _currentTarget;
+    /// <summary>
+    /// Process the hover of the cursor.
+    /// Enable/Disable the outline, and the cursor sprite
+    /// </summary>
     private void RaycastHover()
     {
         Vector2 screenPoint = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) + cursorPos;
@@ -105,25 +110,61 @@ public class Player : MonoBehaviour
         PointClickTarget newTarget = null;
 
         if (Physics.Raycast(ray, out RaycastHit hit))
-        {
             hit.collider.TryGetComponent(out newTarget);
-        }
 
+        // If nothing changed, do nothing (no flicker, no spam)
         if (newTarget == _currentTarget)
             return;
 
-        // If we changed hovered object, disable previous outline
-        if (_currentTarget != null && _currentTarget != newTarget)
+        // Disable previous target visuals
+        if (_currentTarget != null)
+        {
             _currentTarget.SetOutline(false);
+        }
 
-        // Enable the new one
+        // Enable new target visuals
         if (newTarget != null)
+        {
             newTarget.SetOutline(true);
+        }
+
+        // Update cursor sprite (default if null)
+        UpdateCursorSprite(newTarget);
 
         // Cache current
         _currentTarget = newTarget;
-
     }
+
+
+    /// <summary>
+    /// Manage the cursor sprite, if we hover something and what, and if who hover nothing for reset
+    /// </summary>
+    /// <param name="target"></param>
+    private void UpdateCursorSprite(PointClickTarget target)
+    {
+        if (virtualCursorImage == null)
+            return;
+
+        if (target == null)
+        {
+            // Reset cursor when hovering nothing
+            virtualCursorImage.sprite = cursorDefault;
+            return;
+        }
+
+        switch (target.InteractionType)
+        {
+            case InteractionType.Object:
+                virtualCursorImage.sprite = cursorObject;
+                break;
+
+            case InteractionType.MoveTo:
+            default:
+                virtualCursorImage.sprite = cursorMoveTo;
+                break;
+        }
+    }
+
 
     /// <summary>
     /// Whenused click on an PointClickTarget, we process it
