@@ -101,7 +101,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (_currentTarget != null && CanInteract(_currentTarget))
+            if (_currentTarget != null && CanInteract(_currentTarget) && !isInMovement)
                 HandleClick(_currentTarget);
         }
     }
