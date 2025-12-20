@@ -29,7 +29,10 @@ public class Player : MonoBehaviour
     [Tooltip("Is the player currently in movement?")]
     [SerializeField] private bool isInMovement = false;
     [Tooltip("The speed at which the player moves.")]
-    [SerializeField] private float movementSpeed = 5f;
+    [SerializeField] private float moveSpeed = 5f;   
+    [Tooltip("The speed at which the player rotate (Juste for the move()).")]
+    [SerializeField] private float rotateSpeed = 180f; 
+
 
     [Header("Virtual Cursor")]
     [Tooltip("UI cursor (RectTransform) displayed on a Screen Space - Overlay canvas.")]
@@ -63,7 +66,12 @@ public class Player : MonoBehaviour
     [SerializeField] private Sprite cursorObject;
     [SerializeField] private Sprite cursorMoveTo;
 
-    private PointClickTarget _currentTarget;
+    [Header("State")]
+    [SerializeField] private PointClickTarget currentAnchor;
+    public PointClickTarget CurrentAnchor => currentAnchor;
+
+
+    [SerializeField] private PointClickTarget _currentTarget;
     private Vector2 cursorPos;
     private float yaw;
     private float pitch;
@@ -93,7 +101,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (_currentTarget != null)
+            if (_currentTarget != null && CanInteract(_currentTarget))
                 HandleClick(_currentTarget);
         }
     }
@@ -111,6 +119,9 @@ public class Player : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit))
             hit.collider.TryGetComponent(out newTarget);
+
+        if (newTarget != null && !CanInteract(newTarget))
+            newTarget = null;
 
         // If nothing changed, do nothing (no flicker, no spam)
         if (newTarget == _currentTarget)
@@ -178,16 +189,14 @@ public class Player : MonoBehaviour
         switch (target.InteractionType)
         {
             case InteractionType.MoveTo:
+
                 // We had clicked on a point to go to ! 
-
-
                 Move(target);
-
 
                 return;
             case InteractionType.Object:
-                // We had clicked on a object to use
 
+                // We had clicked on a object to use
                 target.Use();
 
                 return;
@@ -206,11 +215,11 @@ public class Player : MonoBehaviour
         Transform cam = _camera.transform; // And our cam transform
 
         // hide cursor
-        Color cursorColor = virtualCursor.gameObject.GetComponent<Image>().color;
+        Color cursorColor = virtualCursorImage.color;
         Color cursorAlpha = new Color(cursorColor.r, cursorColor.g, cursorColor.b, 0f);
         DOVirtual.Color(cursorColor, cursorAlpha, 0.10f, (value) =>
         {
-            virtualCursor.gameObject.GetComponent<Image>().color = value;
+            virtualCursorImage.color = value;
         }).OnComplete( () =>
         {
             // Move the cursor at 0 pos (because, we click on position to go to, so the cursor return at the center of the screen !)
@@ -219,22 +228,32 @@ public class Player : MonoBehaviour
         });
 
 
-        //Calc distance from the two transform.
-        //The dist make the duration of animations (with an factor of speed)
-        float dist = Vector2.Distance(cam.position, targetTransform.position);
-        
+        // Real 3D distance
+        float moveDist = Vector3.Distance(cam.position, targetTransform.position);
+
+        // Angular distance in degrees
+        float angleDist = Quaternion.Angle(cam.rotation, targetTransform.rotation);
+
+        // Convert to durations (speed => units/s or deg/s)
+        float moveDuration = moveDist / moveSpeed;
+        float rotateDuration = angleDist / rotateSpeed;
+
+        // One shared duration so move + rotate end at the same time
+        float duration = Mathf.Max(moveDuration, rotateDuration);
+
         cam.DOKill();
+
         Sequence seq = DOTween.Sequence();
-        //TODO: Polish it ! (I'm not sure of the dis/movementSpeed)
-        seq.Join(cam.DOMove(targetTransform.position, dist/movementSpeed)); // move
-        seq.Join(cam.DORotateQuaternion(targetTransform.rotation, dist/movementSpeed)); // rotate
+        seq.Join(cam.DOMove(targetTransform.position, duration).SetEase(Ease.InOutSine));
+        seq.Join(cam.DORotateQuaternion(targetTransform.rotation, duration).SetEase(Ease.InOutSine));
+
 
         seq.OnComplete(() =>
         {
 
-            DOVirtual.Color(cursorAlpha, cursorColor, 0.20f, (value) =>
+            DOVirtual.Color(cursorAlpha, cursorColor, 0.20f, value =>
             {
-                virtualCursor.gameObject.GetComponent<Image>().color = value;
+                virtualCursorImage.color = value;
             });
 
             // Set yaw pitch to the right pos
@@ -242,21 +261,14 @@ public class Player : MonoBehaviour
             yaw = euler.y;
             pitch = NormalizeAngle(euler.x);
 
+            // Update the current Anchor
+            currentAnchor = target;
             // Un hide cursor
             isInMovement = false;
         });
     }
 
-    /// <summary>
-    /// Normalize angle (350 -> -10)
-    /// </summary>
-    /// <param name="a"></param>
-    /// <returns></returns>
-    float NormalizeAngle(float a)
-    {
-        if (a > 180f) a -= 360f;
-        return a;
-    }
+
 
     public void HandleLook()
     {
@@ -306,6 +318,39 @@ public class Player : MonoBehaviour
         lookTween?.Kill();
         lookTween = _camera.transform
             .DORotateQuaternion(targetRot, lookTweenDuration);
+    }
+
+    /// <summary>
+    /// Return a boolean if the player can interact with this target
+    /// </summary>
+    /// <param name="target">Point and Click Target</param>
+    /// <returns>Bool</returns>
+    private bool CanInteract(PointClickTarget target)
+    {
+        if (target == null)
+            return false;
+
+        // If this target requires an anchor, player must be on it
+        if (target.RequiredAnchor != null && target.RequiredAnchor != currentAnchor)
+            return false;
+
+        // If this is a MoveTo and we are already on it, block it
+        if (target.InteractionType == InteractionType.MoveTo && target == currentAnchor)
+            return false;
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// Normalize angle (350 -> -10)
+    /// </summary>
+    /// <param name="a"></param>
+    /// <returns></returns>
+    float NormalizeAngle(float a)
+    {
+        if (a > 180f) a -= 360f;
+        return a;
     }
 
     /// <summary>

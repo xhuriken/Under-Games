@@ -179,7 +179,7 @@ public class Lever : MonoBehaviour
     /// </summary>
     private void Use()
     {
-        // It's juste point and click
+        // It's just point and click
         Toggle();
     }
 

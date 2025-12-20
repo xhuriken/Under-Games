@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
-
 public enum InteractionType
 {
     MoveTo = 1,
@@ -26,6 +25,12 @@ public class PointClickTarget : MonoBehaviour
 
     [Tooltip("All the outlines script for this object")]
     [SerializeField] private Outline[] outlines;
+
+    [Header("Rules")]
+    [Tooltip("If set, player must already be on this anchor to interact with this target.")]
+    [SerializeField] private PointClickTarget requiredAnchor;
+
+    public PointClickTarget RequiredAnchor => requiredAnchor;
 
     /// <summary>
     /// Called by the point & click controller when the player clicks on this object.
@@ -51,9 +56,13 @@ public class PointClickTarget : MonoBehaviour
         onUse?.Invoke();
     }
 
+    /// <summary>
+    /// Set Outlines scripts of this object to specific value
+    /// </summary>
+    /// <param name="enable"></param>
     public void SetOutline(bool enable)
     {
-        if (outlines == null && outlines.Length == 0f) return;
+        if (outlines == null || outlines.Length == 0) return;
 
         foreach (var o in outlines)
         {
@@ -61,14 +70,14 @@ public class PointClickTarget : MonoBehaviour
         }
     }
 
-    private void Awake()
+    private IEnumerator Start()
     {
-        // Disable all outline
-        if (outlines == null && outlines.Length == 0f) return;
+        // Force refresh of QuickOutline (otherwise the outline color is white the first time)
+        SetOutline(true);
+        // Ensure all plugin Start/Awake ran
+        yield return null;
 
-        foreach (var o in outlines)
-        {
-            o.enabled = false;
-        }
+        SetOutline(false);  
     }
+
 }
