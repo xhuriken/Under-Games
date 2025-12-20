@@ -12,6 +12,9 @@ public class LeverRow : MonoBehaviour
     [Tooltip("All levers in this row. If empty, can be auto-filled from children.")]
     [SerializeField] private List<Lever> levers = new List<Lever>();
 
+    // Keep an activation order of ON levers (last in list = latest ON lever !) (i miss u ObservableCollection)
+    private readonly List<Lever> _onOrder = new List<Lever>();
+
     private Lever latestActivatedLever;
     /// <summary>
     /// Owner of this row.
@@ -23,6 +26,9 @@ public class LeverRow : MonoBehaviour
     /// </summary>
     public IReadOnlyList<Lever> Levers => levers;
 
+    /// <summary>
+    /// this is called in editor not in build btw
+    /// </summary>
     private void OnValidate()
     {
         // OPTIONAL : Get all levers from children if none assigned
@@ -32,6 +38,10 @@ public class LeverRow : MonoBehaviour
             levers = new List<Lever>(GetComponentsInChildren<Lever>(includeInactive: true));
         }
 
+    }
+
+    private void OnEnable()
+    {
         foreach (Lever lever in levers)
         {
             if (lever == null) continue;
@@ -39,6 +49,8 @@ public class LeverRow : MonoBehaviour
             // (and call OnLeverStateChanged if he is called)
             lever.OnStateChanged.AddListener(OnLeverStateChanged);
         }
+
+        RefreshLatestMarker();
     }
 
     /// <summary>
@@ -47,18 +59,46 @@ public class LeverRow : MonoBehaviour
     /// </summary>
     private void OnLeverStateChanged(Lever lever, LeverState newState)
     {
-        // If lever is OFF do nothing
-        if (newState == LeverState.Off)
+        if (lever == null) return;
+
+        switch (newState)
+        {
+            case LeverState.On:
+                // If it was already in the list, remove it and re-add to the end
+                _onOrder.Remove(lever);
+                _onOrder.Add(lever);
+                break;
+
+            case LeverState.Off:
+            default:
+                // If a lever turns OFF, it cannot be "latest ON" anymore
+                _onOrder.Remove(lever);
+                break;
+        }
+
+        RefreshLatestMarker();
+    }
+
+    /// <summary>
+    /// Applies the red marker to the current latest ON lever (last in _onOrder).
+    /// </summary>
+    private void RefreshLatestMarker()
+    {
+        Lever newLatest = (_onOrder.Count > 0) ? _onOrder[_onOrder.Count - 1] : null;
+
+        // If latest did not change, do nothing
+        if (latestActivatedLever == newLatest)
             return;
 
-        // If there was a previously highlighted lever we reset it
-        if (latestActivatedLever != null && latestActivatedLever != lever)
+        // Clear previous marker
+        if (latestActivatedLever != null)
             latestActivatedLever.ClearLatestMarker();
 
-        // set the new one
-        latestActivatedLever = lever;
-        //Update to RED !
-        latestActivatedLever.SetAsLatestOnLever();
+        // Set new marker
+        latestActivatedLever = newLatest;
+
+        if (latestActivatedLever != null)
+            latestActivatedLever.SetAsLatestOnLever();
     }
 
 
