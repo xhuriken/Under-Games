@@ -90,6 +90,9 @@ public class Player : MonoBehaviour
         yaw = euler.y;
         pitch = euler.x;
 
+        //Subscribe to beat
+        MusicManager.beatUpdated += Shake;
+
     }
 
     void Update()
@@ -378,6 +381,19 @@ public class Player : MonoBehaviour
         float d = EllipseDistance(p, ellipse);
         if (d <= 1f) return p;
         return p / d;
+    }
+
+
+    public float spring = 300f;
+    public float damper = 10f;
+    public float shake = 5f;
+    public float dirIntensity = 0.1f;
+    private float sign = 1f;
+    private void Shake()
+    {
+
+        Vector2 dir = Random.insideUnitCircle.normalized * dirIntensity;
+        SDSShaker.Instance.Shake(spring, damper, shake, dir);
     }
 
 }
