@@ -31,7 +31,8 @@ public class Player : MonoBehaviour
     [Tooltip("The speed at which the player moves.")]
     [SerializeField] private float moveSpeed = 5f;   
     [Tooltip("The speed at which the player rotate (Juste for the move()).")]
-    [SerializeField] private float rotateSpeed = 180f; 
+    [SerializeField] private float rotateSpeed = 180f;
+    [SerializeField] private Transform cameraRig;
 
 
     [Header("Virtual Cursor")]
@@ -79,14 +80,14 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        _camera = GetComponentInChildren<Camera>();
+        //_camera = GetComponentInChildren<Camera>();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         cursorPos = Vector2.zero;
 
-        Vector3 euler = _camera.transform.rotation.eulerAngles;
+        Vector3 euler = cameraRig.eulerAngles;
         yaw = euler.y;
         pitch = euler.x;
 
@@ -215,7 +216,6 @@ public class Player : MonoBehaviour
 
         // Get target transform from the clicked object
         Transform targetTransform = target.GetTransformTarget();
-        Transform cam = _camera.transform; // And our cam transform
 
         // hide cursor
         Color cursorColor = virtualCursorImage.color;
@@ -230,12 +230,12 @@ public class Player : MonoBehaviour
             virtualCursor.anchoredPosition = Vector3.zero;
         });
 
-
+            
         // Real 3D distance
-        float moveDist = Vector3.Distance(cam.position, targetTransform.position);
+        float moveDist = Vector3.Distance(cameraRig.position, targetTransform.position);
 
         // Angular distance in degrees
-        float angleDist = Quaternion.Angle(cam.rotation, targetTransform.rotation);
+        float angleDist = Quaternion.Angle(cameraRig.rotation, targetTransform.rotation);
 
         // Convert to durations (speed => units/s or deg/s)
         float moveDuration = moveDist / moveSpeed;
@@ -244,23 +244,24 @@ public class Player : MonoBehaviour
         // One shared duration so move + rotate end at the same time
         float duration = Mathf.Max(moveDuration, rotateDuration);
 
-        cam.DOKill();
+        cameraRig.DOKill();
 
         Sequence seq = DOTween.Sequence();
-        seq.Join(cam.DOMove(targetTransform.position, duration).SetEase(Ease.InOutSine));
-        seq.Join(cam.DORotateQuaternion(targetTransform.rotation, duration).SetEase(Ease.InOutSine));
+        seq.Join(cameraRig.DOMove(targetTransform.position, duration).SetEase(Ease.InOutSine));
+        seq.Join(cameraRig.DORotateQuaternion(targetTransform.rotation, duration).SetEase(Ease.InOutSine));
+
 
 
         seq.OnComplete(() =>
         {
 
-            DOVirtual.Color(cursorAlpha, cursorColor, 0.20f, value =>
+            DOVirtual.Color(cursorAlpha, cursorColor, 1f, value =>
             {
                 virtualCursorImage.color = value;
             });
 
             // Set yaw pitch to the right pos
-            Vector3 euler = cam.rotation.eulerAngles;
+            Vector3 euler = cameraRig.eulerAngles;
             yaw = euler.y;
             pitch = NormalizeAngle(euler.x);
 
@@ -319,7 +320,7 @@ public class Player : MonoBehaviour
 
         // Animation
         lookTween?.Kill();
-        lookTween = _camera.transform
+        lookTween = cameraRig
             .DORotateQuaternion(targetRot, lookTweenDuration);
     }
 
@@ -388,7 +389,6 @@ public class Player : MonoBehaviour
     public float damper = 10f;
     public float shake = 5f;
     public float dirIntensity = 0.1f;
-    private float sign = 1f;
     private void Shake()
     {
 
