@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{eeb6518b-8518-436f-9a8b-6894b9c187b9}">
+		<property name="note">
+			<value>COMMENT JE CHANGE CE PTN DE TEMPO !
+</value>
+		</property>
+		<property name="assetPath">
+			<value>Musics/Horses (Exium Remix).mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>396.82612244897962</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{7c765997-ba8b-43c7-9872-9d0165c6d17b}</destination>
+		</relationship>
+	</object>
+</objects>
