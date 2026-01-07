@@ -1,5 +1,32 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8282301404227722669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/Main
+  m_EditorClassIdentifier: 
+  Path: event:/Music/Main
+  Guid:
+    Data1: 1821494788
+    Data2: 1140489890
+    Data3: 902641845
+    Data4: -1383334477
+  Banks:
+  - {fileID: 6259914471496453423}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 396671
 --- !u!114 &-7829651016105723022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,6 +101,26 @@ MonoBehaviour:
   lastModified: 639034006737354270
   FileSizes: []
   Exists: 1
+--- !u!114 &-4145402093418969065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.strings.bank
+  m_EditorClassIdentifier: 
+  Path: Assets/StreamingAssets/FMOD/Build/Desktop/Master.strings.bank
+  Name: Master.strings
+  StudioPath: bank:/Master.strings
+  lastModified: 639034011064584371
+  FileSizes:
+  - Name: 
+    Value: 772
+  Exists: 1
 --- !u!114 &-3109687835305499457
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -145,17 +192,17 @@ MonoBehaviour:
   m_Name: FMODStudioCache
   m_EditorClassIdentifier: 
   EditorBanks:
-  - {fileID: -3074660988051738936}
-  - {fileID: -6205499182442394571}
+  - {fileID: -4145402093418969065}
+  - {fileID: 6259914471496453423}
   EditorEvents:
-  - {fileID: 1043995136153002697}
+  - {fileID: -8282301404227722669}
   EditorParameters: []
   MasterBanks:
-  - {fileID: -6205499182442394571}
+  - {fileID: 6259914471496453423}
   StringsBanks:
-  - {fileID: -3074660988051738936}
+  - {fileID: -4145402093418969065}
   cacheVersion: 131857
-  cacheTime: 639034006737374229
+  cacheTime: 639034011064584371
   SerializableEventsDict:
   - key: event:/Music/Main
     index: 0
@@ -186,6 +233,24 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 396671
+--- !u!114 &6259914471496453423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: Assets/StreamingAssets/FMOD/Build/Desktop/Master.bank
+  Name: Master
+  StudioPath: bank:/Master
+  lastModified: 639034011064564345
+  FileSizes: []
+  Exists: 1
 --- !u!114 &7745081949067921730
 MonoBehaviour:
   m_ObjectHideFlags: 0
