@@ -76,6 +76,7 @@ public class Player : MonoBehaviour
     private Vector2 cursorPos;
     private float yaw;
     private float pitch;
+    private float roll;
     private Tween lookTween;
 
     void Start()
@@ -89,8 +90,8 @@ public class Player : MonoBehaviour
 
         Vector3 euler = cameraRig.eulerAngles;
         yaw = euler.y;
-        pitch = euler.x;
-
+        pitch = NormalizeAngle(euler.y);
+        roll = NormalizeAngle(euler.z);
         //Subscribe to beat
         MusicManager.beatUpdated += Shake;
 
@@ -251,7 +252,6 @@ public class Player : MonoBehaviour
         seq.Join(cameraRig.DORotateQuaternion(targetTransform.rotation, duration).SetEase(Ease.InOutSine));
 
 
-
         seq.OnComplete(() =>
         {
 
@@ -264,6 +264,7 @@ public class Player : MonoBehaviour
             Vector3 euler = cameraRig.eulerAngles;
             yaw = euler.y;
             pitch = NormalizeAngle(euler.x);
+            roll = NormalizeAngle(euler.z);
 
             // Update the current Anchor
             currentAnchor = target;
@@ -316,7 +317,7 @@ public class Player : MonoBehaviour
         pitch -= cursorPos.y * lookSensitivity * speed * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
 
-        Quaternion targetRot = Quaternion.Euler(pitch, yaw, 0f);
+        Quaternion targetRot = Quaternion.Euler(pitch, yaw, roll);
 
         // Animation
         lookTween?.Kill();
