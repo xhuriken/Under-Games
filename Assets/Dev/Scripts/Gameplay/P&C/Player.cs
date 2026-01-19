@@ -61,12 +61,6 @@ public class Player : MonoBehaviour
     [Tooltip("DOTween smoothing duration for look rotation.")]
     [SerializeField] private float lookTweenDuration = 0.08f;
 
-    [Header("Cursor")]
-    [SerializeField] private Image virtualCursorImage;
-    [SerializeField] private Sprite cursorDefault;
-    [SerializeField] private Sprite cursorObject;
-    [SerializeField] private Sprite cursorMoveTo;
-
     [Header("State")]
     [SerializeField] private PointClickTarget currentAnchor;
     public PointClickTarget CurrentAnchor => currentAnchor;
@@ -83,8 +77,6 @@ public class Player : MonoBehaviour
     {
         //_camera = GetComponentInChildren<Camera>();
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
 
         cursorPos = Vector2.zero;
 
@@ -145,41 +137,14 @@ public class Player : MonoBehaviour
         }
 
         // Update cursor sprite (default if null)
-        UpdateCursorSprite(newTarget);
+        GameCursor.Instance.UpdateCursorSprite(newTarget);
 
         // Cache current
         _currentTarget = newTarget;
     }
 
 
-    /// <summary>
-    /// Manage the cursor sprite, if we hover something and what, and if who hover nothing for reset
-    /// </summary>
-    /// <param name="target"></param>
-    private void UpdateCursorSprite(PointClickTarget target)
-    {
-        if (virtualCursorImage == null)
-            return;
-
-        if (target == null)
-        {
-            // Reset cursor when hovering nothing
-            virtualCursorImage.sprite = cursorDefault;
-            return;
-        }
-
-        switch (target.InteractionType)
-        {
-            case InteractionType.Object:
-                virtualCursorImage.sprite = cursorObject;
-                break;
-
-            case InteractionType.MoveTo:
-            default:
-                virtualCursorImage.sprite = cursorMoveTo;
-                break;
-        }
-    }
+    
 
 
     /// <summary>
@@ -218,21 +183,9 @@ public class Player : MonoBehaviour
         // Get target transform from the clicked object
         Transform targetTransform = target.GetTransformTarget();
 
-        // hide cursor
-        Color cursorColor = virtualCursorImage.color;
-        Color cursorAlpha = new Color(cursorColor.r, cursorColor.g, cursorColor.b, 0f);
-        DOVirtual.Color(cursorColor, cursorAlpha, 0.10f, (value) =>
-        {
-            virtualCursorImage.color = value;
-        }).OnComplete( () =>
-        {
-            // Move the cursor at 0 pos (because, we click on position to go to, so the cursor return at the center of the screen !)
-            cursorPos = Vector3.zero;
-            virtualCursor.anchoredPosition = Vector3.zero;
-        });
-
+        GameCursor.Instance.Hide();
             
-        // Real 3D distance
+;        // Real 3D distance
         float moveDist = Vector3.Distance(cameraRig.position, targetTransform.position);
 
         // Angular distance in degrees
@@ -254,11 +207,12 @@ public class Player : MonoBehaviour
 
         seq.OnComplete(() =>
         {
+            // Move the cursor at 0 pos (Center the cursor in the screen)
+            cursorPos = Vector3.zero;
+            virtualCursor.anchoredPosition = Vector2.zero;
 
-            DOVirtual.Color(cursorAlpha, cursorColor, 1f, value =>
-            {
-                virtualCursorImage.color = value;
-            });
+            //Show cursor
+            GameCursor.Instance.Show();
 
             // Set yaw pitch to the right pos
             Vector3 euler = cameraRig.eulerAngles;

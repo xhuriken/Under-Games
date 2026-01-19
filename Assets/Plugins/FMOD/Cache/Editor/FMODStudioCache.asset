@@ -116,7 +116,7 @@ MonoBehaviour:
   Path: Assets/StreamingAssets/FMOD/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639034011064584371
+  lastModified: 639034006737374229
   FileSizes:
   - Name: 
     Value: 772
@@ -202,7 +202,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: -4145402093418969065}
   cacheVersion: 131857
-  cacheTime: 639034011064584371
+  cacheTime: 639034006737374229
   SerializableEventsDict:
   - key: event:/Music/Main
     index: 0
@@ -248,7 +248,7 @@ MonoBehaviour:
   Path: Assets/StreamingAssets/FMOD/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639034011064564345
+  lastModified: 639034006737354270
   FileSizes: []
   Exists: 1
 --- !u!114 &7745081949067921730
