@@ -29,7 +29,8 @@ public class PointClickTarget : MonoBehaviour
     [Header("Rules")]
     [Tooltip("If set, player must already be on this anchor to interact with this target.")]
     [SerializeField] private PointClickTarget requiredAnchor;
-
+    [Tooltip("If true, when player move to this object, it convert to an usable object and vise versa when he leave it")]
+    [SerializeField] private bool isConvertible = false;
     public PointClickTarget RequiredAnchor => requiredAnchor;
 
     /// <summary>
@@ -68,6 +69,16 @@ public class PointClickTarget : MonoBehaviour
         {
             o.enabled = enable;
         }
+    }
+
+    /// <summary>
+    /// Convert "MoveTo" to an object and vice versa!
+    /// </summary>
+    public void Convert()
+    {
+        if(!isConvertible) return;
+
+        interactionType = interactionType == InteractionType.MoveTo ? InteractionType.Object : InteractionType.MoveTo;
     }
 
     private IEnumerator Start()

@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 
-
 public class GameCursor : MonoBehaviour
 {
 
@@ -44,8 +43,6 @@ public class GameCursor : MonoBehaviour
         cursorAlpha = new Color(cursorColor.r, cursorColor.g, cursorColor.b, 0f);
     }
 
-
-
     /// <summary>
     /// Manage the cursor sprite, if we hover something and what, and if who hover nothing for reset
     /// </summary>
@@ -80,10 +77,13 @@ public class GameCursor : MonoBehaviour
     /// </summary>
     public void Hide()
     {
+        // Clear previous tweens on this object to avoid conflicts
+        this.DOKill();
+
         DOVirtual.Color(cursorColor, cursorAlpha, 0.10f, (value) =>
         {
             virtualCursorImage.color = value;
-        });
+        }).SetTarget(this);
     }
 
     /// <summary>
@@ -91,10 +91,13 @@ public class GameCursor : MonoBehaviour
     /// </summary>
     public void Show()
     {
+        // Clear previous tweens on this object to avoid conflicts
+        this.DOKill();
+
         DOVirtual.Color(cursorAlpha, cursorColor, 1f, value =>
         {
             virtualCursorImage.color = value;
-        });
+        }).SetTarget(this);
 
     }
 }

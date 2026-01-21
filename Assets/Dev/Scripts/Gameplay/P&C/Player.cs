@@ -9,7 +9,6 @@ using Cursor = UnityEngine.Cursor;
 
 public class Player : MonoBehaviour
 {
-
     /*
      * This script is an advanced point & click player controller.
      * When the player !isInMouvement, the camera can rotate around the player (with the mouse), but not moving !
@@ -34,7 +33,6 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotateSpeed = 180f;
     [SerializeField] private Transform cameraRig;
 
-
     [Header("Virtual Cursor")]
     [Tooltip("UI cursor (RectTransform) displayed on a Screen Space - Overlay canvas.")]
     [SerializeField] private RectTransform virtualCursor;
@@ -46,13 +44,11 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector2 maxEllipse = new Vector2(400f, 250f);
 
     // It's for the ramp of the lerp to make enjoyable look
-    // TODO: Move that, it's not "cleaan"
-    public float temp = 3f;
+    [SerializeField] private float rampFactor = 3f;
 
     [Header("Look")]
     [Tooltip("Mouse sensitivity for camera rotation.")]
     [SerializeField] private float lookSensitivity = 2.5f;
-
 
     [Tooltip("Clamp for vertical rotation (pitch).")]
     [SerializeField] private float minPitch = -30f;
@@ -60,13 +56,12 @@ public class Player : MonoBehaviour
 
     [Tooltip("DOTween smoothing duration for look rotation.")]
     [SerializeField] private float lookTweenDuration = 0.08f;
-
-    [Header("State")]
-    [SerializeField] private PointClickTarget currentAnchor;
+    
+    private PointClickTarget _currentTarget;
+    private PointClickTarget currentAnchor;
     public PointClickTarget CurrentAnchor => currentAnchor;
 
-
-    [SerializeField] private PointClickTarget _currentTarget;
+    [Header("State")]
     private Vector2 cursorPos;
     private float yaw;
     private float pitch;
@@ -75,9 +70,6 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        //_camera = GetComponentInChildren<Camera>();
-
-
         cursorPos = Vector2.zero;
 
         Vector3 euler = cameraRig.eulerAngles;
@@ -86,7 +78,6 @@ public class Player : MonoBehaviour
         roll = NormalizeAngle(euler.z);
         //Subscribe to beat
         MusicManager.beatUpdated += Shake;
-
     }
 
     void Update()
@@ -96,9 +87,17 @@ public class Player : MonoBehaviour
         // Throw raycast for hover !
         RaycastHover();
 
+        // Key DOWN
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             if (_currentTarget != null && CanInteract(_currentTarget) && !isInMovement)
+                HandleClick(_currentTarget);
+        }
+
+        // Key UP
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            if (_currentTarget != null && /*CanInteract(_currentTarget) &&*/ !isInMovement)
                 HandleClick(_currentTarget);
         }
     }
@@ -121,7 +120,7 @@ public class Player : MonoBehaviour
             newTarget = null;
 
         // If nothing changed, do nothing (no flicker, no spam)
-        if (newTarget == _currentTarget)
+        if (newTarget == _currentTarget && !isInMovement)
             return;
 
         // Disable previous target visuals
@@ -131,7 +130,7 @@ public class Player : MonoBehaviour
         }
 
         // Enable new target visuals
-        if (newTarget != null)
+        if (newTarget != null && !isInMovement)
         {
             newTarget.SetOutline(true);
         }
@@ -144,11 +143,8 @@ public class Player : MonoBehaviour
     }
 
 
-    
-
-
     /// <summary>
-    /// Whenused click on an PointClickTarget, we process it
+    /// When we click on an PointClickTarget, we process it
     /// </summary>
     /// <param name="target"></param>
     public void HandleClick(PointClickTarget target)
@@ -179,6 +175,11 @@ public class Player : MonoBehaviour
     public void Move(PointClickTarget target)
     {
         isInMovement = true;
+
+        // Convert the current Target before moving (if it's convertible)
+        _currentTarget.Convert();
+        // Convert the current anchor before moving (if it's convertible)
+        currentAnchor?.Convert();
 
         // Get target transform from the clicked object
         Transform targetTransform = target.GetTransformTarget();
@@ -222,6 +223,7 @@ public class Player : MonoBehaviour
 
             // Update the current Anchor
             currentAnchor = target;
+
             // Un hide cursor
             isInMovement = false;
         });
@@ -246,7 +248,7 @@ public class Player : MonoBehaviour
         // center attraction force
         if (distMin > 1f)
         {
-            float t = Mathf.InverseLerp(1f, temp, distMin);
+            float t = Mathf.InverseLerp(1f, rampFactor, distMin);
             Vector2 pullDir = -cursorPos.normalized;
             cursorPos += pullDir * returnForce * t * Time.deltaTime;
         }
@@ -265,7 +267,7 @@ public class Player : MonoBehaviour
         if (distMin <= 1f)
             return;
 
-        float speed = Mathf.InverseLerp(1f, temp, distMin);
+        float speed = Mathf.InverseLerp(1f, rampFactor, distMin);
 
         yaw += cursorPos.x * lookSensitivity * speed * Time.deltaTime;
         pitch -= cursorPos.y * lookSensitivity * speed * Time.deltaTime;

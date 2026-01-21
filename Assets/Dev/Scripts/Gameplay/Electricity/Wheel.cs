@@ -20,4 +20,9 @@ public class Wheel : MonoBehaviour
     {
         
     }
+
+    public void Use()
+    {
+        Debug.Log("Wheel Used");
+    }
 }
