@@ -22,6 +22,8 @@ public class PointClickTarget : MonoBehaviour
 
     [Tooltip("Event called when this object is used")]
     [SerializeField] private UnityEvent onUse;
+    [Tooltip("Event called when this we release click on object")]
+    [SerializeField] private UnityEvent onRelease;
 
     [Tooltip("All the outlines script for this object")]
     [SerializeField] private Outline[] outlines;
@@ -57,6 +59,14 @@ public class PointClickTarget : MonoBehaviour
         onUse?.Invoke();
     }
 
+    /// <summary>
+    /// Called when the object is released
+    /// And it's the spefific object script who will define what to do when used ! (it will subscribe)
+    /// </summary>
+    public void Release()
+    {
+        onRelease?.Invoke();
+    }
     /// <summary>
     /// Set Outlines scripts of this object to specific value
     /// </summary>

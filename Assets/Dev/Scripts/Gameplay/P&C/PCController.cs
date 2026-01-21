@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 
-public class Player : MonoBehaviour
+public class PCController : MonoBehaviour
 {
     /*
      * This script is an advanced point & click player controller.
@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
      * 
      * There will be another script we'll check when specific objects are clickable or not. (Like a manager you know) that it i think.
      */
+
+    public static PCController Instance;
 
     [Header("Settings")]
     [Tooltip("Reference to the player's camera. (Set up automaticly)")]
@@ -56,6 +58,9 @@ public class Player : MonoBehaviour
 
     [Tooltip("DOTween smoothing duration for look rotation.")]
     [SerializeField] private float lookTweenDuration = 0.08f;
+
+    [Tooltip("If true, the player's look is locked and cannot rotate.")]
+    [SerializeField] public bool isLookLocked = false;
     
     private PointClickTarget _currentTarget;
     private PointClickTarget currentAnchor;
@@ -67,6 +72,11 @@ public class Player : MonoBehaviour
     private float pitch;
     private float roll;
     private Tween lookTween;
+
+    private void Awake()
+    {
+        if(Instance == null) Instance = this;
+    }
 
     void Start()
     {
@@ -82,7 +92,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (!isInMovement) HandleLook();
+        if (!isInMovement && !isLookLocked) HandleLook();
 
         // Throw raycast for hover !
         RaycastHover();
@@ -98,7 +108,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Mouse0))
         {
             if (_currentTarget != null && /*CanInteract(_currentTarget) &&*/ !isInMovement)
-                HandleClick(_currentTarget);
+                HandleClick(_currentTarget, true);
         }
     }
 
@@ -147,29 +157,45 @@ public class Player : MonoBehaviour
     /// When we click on an PointClickTarget, we process it
     /// </summary>
     /// <param name="target"></param>
-    public void HandleClick(PointClickTarget target)
+    public void HandleClick(PointClickTarget target, bool triggerRelease = false)
     {
-        Debug.Log($"Player clicked on a PointClickTarget! {target.gameObject.name}");
+        Debug.Log($"Player is interacting on a PointClickTarget! {target.gameObject.name}");
         //GameObject ob = target.gameObject;
 
-        switch (target.InteractionType)
+        if (!triggerRelease)
         {
-            case InteractionType.MoveTo:
-
-                // We had clicked on a point to go to ! 
-                Move(target);
-
-                return;
-            case InteractionType.Object:
-
-                // We had clicked on a object to use
-                target.Use();
-
-                return;
-            default:
-                Debug.Log("I'm gay");
-                return;
+            switch (target.InteractionType)
+            {
+                case InteractionType.MoveTo:
+                    // We had clicked on a point to go to ! 
+                    Move(target);
+                    return;
+                case InteractionType.Object:
+                    // We had clicked on a object to use
+                    target.Use();
+                    return;
+                default:
+                    Debug.Log("I'm gay");
+                    return;
+            }
         }
+        else
+        {
+            switch (target.InteractionType)
+            {
+                case InteractionType.MoveTo:
+                    // We release on a MoveTo (useless for now ?)
+                    return;
+                case InteractionType.Object:
+                    // We had clicked on a object to use
+                    target.Release();
+                    return;
+                default:
+                    Debug.Log("I'm so fucking gay");
+                    return;
+            }
+        }
+
     }
 
     public void Move(PointClickTarget target)

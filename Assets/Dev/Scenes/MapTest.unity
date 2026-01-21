@@ -1101,37 +1101,6 @@ Transform:
   - {fileID: 486854790}
   m_Father: {fileID: 757317616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &433099791
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 433099792}
-  m_Layer: 0
-  m_Name: ---MANAGERS---
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &433099792
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 433099791}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.22369336, y: 0.995703, z: -2.0714312}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &433486293
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1833,6 +1802,9 @@ MonoBehaviour:
   onUse:
     m_PersistentCalls:
       m_Calls: []
+  onRelease:
+    m_PersistentCalls:
+      m_Calls: []
   outlines:
   - {fileID: 697792655}
   requiredAnchor: {fileID: 0}
@@ -1982,6 +1954,7 @@ MonoBehaviour:
   minPitch: -90
   maxPitch: 80
   lookTweenDuration: 0.37
+  isLookLocked: 0
   spring: 700
   damper: 10
   shake: 1
@@ -2300,6 +2273,9 @@ MonoBehaviour:
   interactionType: 1
   moveTarget: {fileID: 1283788993}
   onUse:
+    m_PersistentCalls:
+      m_Calls: []
+  onRelease:
     m_PersistentCalls:
       m_Calls: []
   outlines: []
@@ -2768,6 +2744,9 @@ MonoBehaviour:
   onUse:
     m_PersistentCalls:
       m_Calls: []
+  onRelease:
+    m_PersistentCalls:
+      m_Calls: []
   outlines: []
   requiredAnchor: {fileID: 0}
   isConvertible: 0
@@ -2935,6 +2914,21 @@ MonoBehaviour:
       - m_Target: {fileID: 1315609916}
         m_TargetAssemblyTypeName: Wheel, Assembly-CSharp
         m_MethodName: Use
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onRelease:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315609916}
+        m_TargetAssemblyTypeName: Wheel, Assembly-CSharp
+        m_MethodName: Release
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3114,50 +3108,6 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 2378370, guid: dc8f3955c063af240afd23143f496335, type: 3}
   m_PrefabInstance: {fileID: 1300105270}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1492905388
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1492905390}
-  - component: {fileID: 1492905389}
-  m_Layer: 0
-  m_Name: LeverManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1492905389
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1492905388}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae7c18fcf3bc52a40a41c94fcb5c40a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &1492905390
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1492905388}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.22369336, y: 0.995703, z: -2.0714312}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1497841223
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4117,6 +4067,9 @@ MonoBehaviour:
   onUse:
     m_PersistentCalls:
       m_Calls: []
+  onRelease:
+    m_PersistentCalls:
+      m_Calls: []
   outlines: []
   requiredAnchor: {fileID: 0}
   isConvertible: 0
@@ -4559,8 +4512,6 @@ SceneRoots:
   - {fileID: 190284426}
   - {fileID: 275265175}
   - {fileID: 803344659}
-  - {fileID: 433099792}
-  - {fileID: 1492905390}
   - {fileID: 294475578}
   - {fileID: 757317616}
   - {fileID: 1658543312}

@@ -23,6 +23,13 @@ public class Wheel : MonoBehaviour
 
     public void Use()
     {
+        PCController.Instance.isLookLocked = true;
         Debug.Log("Wheel Used");
+    }
+
+    public void Release()
+    {
+        PCController.Instance.isLookLocked = false;
+        Debug.Log("Wheel Release");
     }
 }
