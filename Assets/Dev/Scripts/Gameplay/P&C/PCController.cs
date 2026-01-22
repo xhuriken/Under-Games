@@ -62,8 +62,9 @@ public class PCController : MonoBehaviour
     [Tooltip("If true, the player's look is locked and cannot rotate.")]
     [SerializeField] public bool isLookLocked = false;
     
-    private PointClickTarget _currentTarget;
+    private PointClickTarget _currentHoveringTarget;
     private PointClickTarget currentAnchor;
+    [SerializeField]private PointClickTarget usedObject;
     public PointClickTarget CurrentAnchor => currentAnchor;
 
     [Header("State")]
@@ -100,15 +101,17 @@ public class PCController : MonoBehaviour
         // Key DOWN
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (_currentTarget != null && CanInteract(_currentTarget) && !isInMovement)
-                HandleClick(_currentTarget);
+            if (_currentHoveringTarget != null && CanInteract(_currentHoveringTarget) && !isInMovement)
+                HandleClick(_currentHoveringTarget);
+
+            if(_currentHoveringTarget == null) usedObject = null;
         }
 
         // Key UP
         if (Input.GetKeyUp(KeyCode.Mouse0))
         {
-            if (_currentTarget != null && /*CanInteract(_currentTarget) &&*/ !isInMovement)
-                HandleClick(_currentTarget, true);
+            if (usedObject != null && /*CanInteract(_currentTarget) &&*/ !isInMovement)
+                HandleClick(usedObject, true);
         }
     }
 
@@ -129,18 +132,32 @@ public class PCController : MonoBehaviour
         if (newTarget != null && !CanInteract(newTarget))
             newTarget = null;
 
-        // If nothing changed, do nothing (no flicker, no spam)
-        if (newTarget == _currentTarget && !isInMovement)
+        if (usedObject != null || isInMovement)
+        {
+            _currentHoveringTarget?.SetOutline(false);
+            newTarget?.SetOutline(false);
             return;
+        }
+
+        // If nothing changed, do nothing (no flicker, no spam)
+        // if the new target is the same as the current one, and if we are not in movement we stop here
+        //if (newTarget == _currentHoveringTarget || isInMovement)
+        //    return;
+
+        // If we're here, the target changed ! (or we're in movement)
+        // the latest = _currentHoveringTarget
+        // the new one = newTarget
 
         // Disable previous target visuals
-        if (_currentTarget != null)
+        // if current target is not null (so the last technicly, because the real target is "newTarget")
+        if (_currentHoveringTarget != null)
         {
-            _currentTarget.SetOutline(false);
+            _currentHoveringTarget.SetOutline(false);
         }
 
         // Enable new target visuals
-        if (newTarget != null && !isInMovement)
+        // if target is not nul, if we are not in movement, and if we are not using an object right now
+        if (newTarget != null)
         {
             newTarget.SetOutline(true);
         }
@@ -149,7 +166,7 @@ public class PCController : MonoBehaviour
         GameCursor.Instance.UpdateCursorSprite(newTarget);
 
         // Cache current
-        _currentTarget = newTarget;
+        _currentHoveringTarget = newTarget;
     }
 
 
@@ -172,6 +189,7 @@ public class PCController : MonoBehaviour
                     return;
                 case InteractionType.Object:
                     // We had clicked on a object to use
+                    usedObject = target;
                     target.Use();
                     return;
                 default:
@@ -181,19 +199,10 @@ public class PCController : MonoBehaviour
         }
         else
         {
-            switch (target.InteractionType)
-            {
-                case InteractionType.MoveTo:
-                    // We release on a MoveTo (useless for now ?)
-                    return;
-                case InteractionType.Object:
-                    // We had clicked on a object to use
-                    target.Release();
-                    return;
-                default:
-                    Debug.Log("I'm so fucking gay");
-                    return;
-            }
+            Debug.Log($"Player is releasing interaction on a PointClickTarget! {target.gameObject.name}");
+            target.Release();
+            usedObject.SetOutline(true);
+            usedObject = null;
         }
 
     }
@@ -203,7 +212,7 @@ public class PCController : MonoBehaviour
         isInMovement = true;
 
         // Convert the current Target before moving (if it's convertible)
-        _currentTarget.Convert();
+        _currentHoveringTarget.Convert();
         // Convert the current anchor before moving (if it's convertible)
         currentAnchor?.Convert();
 
